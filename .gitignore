@@ -1,0 +1,19 @@
+axon.db
+axon.db-shm
+axon.db-wal
+
+# Python
+sensors/.venv/
+sensors/__pycache__/
+sensors/**/__pycache__/
+sensors/.env
+*.pyc
+
+# Node
+agent/node_modules/
+agent/dist/
+agent/.env
+
+# Logs
+*.log
+sensors/axon.log

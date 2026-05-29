@@ -1,0 +1,11 @@
+[project]
+name = "axon-sensors"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "psutil>=5.9",
+    "python-dotenv>=1.0",
+]
+
+[tool.uv]
+dev-dependencies = []
