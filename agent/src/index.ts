@@ -1,26 +1,36 @@
 import * as readline from "readline";
 import { ask } from "./brain.js";
-import { LOCAL_MODEL, OLLAMA_HOST } from "./router.js";
+import { LOCAL_MODEL, OLLAMA_HOST, checkLocalModel } from "./router.js";
 
-console.log(`axon agent — model: ${LOCAL_MODEL}  ollama: ${OLLAMA_HOST}`);
-console.log('Ask a question about this machine, or type "exit" to quit.\n');
+(async () => {
+  console.log(`axon agent — model: ${LOCAL_MODEL}  ollama: ${OLLAMA_HOST}`);
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const localOk = await checkLocalModel();
+  if (localOk) {
+    console.log("✓ Local model is present and reachable.");
+  } else {
+    console.warn("⚠ No local model found (Ollama not running or model missing). Escalation may be used if available.");
+  }
 
-function prompt() {
-  rl.question("> ", async (input) => {
-    const q = input.trim();
-    if (!q || q === "exit") { rl.close(); return; }
+  console.log('Ask a question about this machine, or type "exit" to quit.\n');
 
-    try {
-      const answer = await ask(q);
-      console.log(`\n${answer}\n`);
-    } catch (e) {
-      console.error("error:", e);
-    }
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-    prompt();
-  });
-}
+  function prompt() {
+    rl.question("> ", async (input) => {
+      const q = input.trim();
+      if (!q || q === "exit") { rl.close(); return; }
 
-prompt();
+      try {
+        const answer = await ask(q);
+        console.log(`\n${answer}\n`);
+      } catch (e) {
+        console.error("error:", e);
+      }
+
+      prompt();
+    });
+  }
+
+  prompt();
+})().catch(console.error);

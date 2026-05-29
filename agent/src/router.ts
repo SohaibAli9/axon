@@ -20,3 +20,19 @@ export async function canEscalate(): Promise<boolean> {
     return false;
   }
 }
+
+export async function checkLocalModel(): Promise<boolean> {
+  try {
+    const res = await fetch(`http://${OLLAMA_HOST}/api/tags`, {
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return false;
+    const data: any = await res.json();
+    if (data && Array.isArray(data.models)) {
+      return data.models.some((m: any) => m.name === LOCAL_MODEL);
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
