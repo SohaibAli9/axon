@@ -1,6 +1,6 @@
 # axon
 
-Self-contained edge intelligence agent for bridge VMs and air-gapped infrastructure. Monitors ports, services, logs, and telemetry. Reasons locally with a small LLM (Qwen3.5 4B or Gemma 4 E4B via Ollama). Stores state in SQLite. Can be dropped onto a locked VM as a single package with no cloud dependency.
+Self-contained edge intelligence agent for bridge VMs and air-gapped infrastructure. Monitors ports, services, logs, and telemetry. Reasons locally with a small LLM (Qwen3 1.7B Q4_K_M via Ollama). Stores state in SQLite. Can be dropped onto a locked VM as a single package with no cloud dependency.
 
 Primary stack: TypeScript (Pi agent framework) + Python (sensor collectors) + SQLite + Ollama.
 
@@ -9,8 +9,8 @@ Primary stack: TypeScript (Pi agent framework) + Python (sensor collectors) + SQ
 ## Run
 
 ```bash
-# start ollama model
-ollama run qwen3.5:4b
+# start ollama model (service auto-starts on boot via systemd)
+ollama pull qwen3:1.7b
 
 # run sensors (Python)
 cd sensors && python collect.py
@@ -54,8 +54,12 @@ Sensors write. Agent reads. The only write path from the agent is through gated 
 
 ## Model strategy
 
-- **Default brain:** Qwen3.5 4B Q4 (~3.4 GB RAM, ~97% tool-call reliability) — best small model for agentic tool loops.
-- **Fallback brain:** Gemma 4 E4B Q4 (~5 GB RAM) — validate head-to-head on Vultr before committing.
+- **Default brain:** Qwen3 1.7B Q4_K_M (~1.4 GB disk, ~5.4 GB total RAM at load with 4K ctx). #1 agent score (0.960) in Local Agent Bench Round 3 (Feb 2026), 100% tool-call restraint, ~14-15 tok/s on this hardware (2-core EPYC, CPU-only).
+  - Env: `AXON_MODEL=qwen3:1.7b` (set in `router.ts` default, or override via env).
+- **Ollama tuning (set via /etc/systemd/system/ollama.service.d/override.conf):**
+  - `OLLAMA_KV_CACHE_TYPE=q4_0` — 75% KV cache reduction
+  - `OLLAMA_NUM_PARALLEL=1` — prevents context multiplication under concurrency
+  - `OLLAMA_MAX_LOADED_MODELS=2` — at most 2 models hot in RAM
 - **Escalation:** DeepSeek V4 Flash via OpenAI-compat endpoint when internet is available and local model flags low confidence. One-line swap in `router.ts`.
 - Use grammar-constrained decoding (llama.cpp GBNF or Ollama JSON mode) for all tool calls.
 

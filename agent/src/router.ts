@@ -3,7 +3,7 @@
  * Swap ESCALATION_MODEL or ESCALATION_BASE_URL to change the escalation target.
  */
 
-export const LOCAL_MODEL = process.env.AXON_MODEL ?? "qwen3.5:4b";
+export const LOCAL_MODEL = process.env.AXON_MODEL ?? "qwen3:1.7b";
 export const OLLAMA_HOST = process.env.OLLAMA_HOST ?? "http://localhost:11434";
 
 // Escalation via OpenAI-compat endpoint (DeepSeek, etc.)
